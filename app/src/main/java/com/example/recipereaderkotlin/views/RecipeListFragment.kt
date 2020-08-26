@@ -2,7 +2,6 @@ package com.example.recipereaderkotlin.views
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -19,15 +18,15 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        navController = Navigation.findNavController(view)
 
+        navController = Navigation.findNavController(view)
         initRecyclerView()
 
     }
 
-    private fun initRecyclerView() {
+    private fun setCategories(): MutableList<RecipeCategories>{
 
-        var recipeList = mutableListOf(
+        return mutableListOf(
             RecipeCategories( "barbecue", R.drawable.barbecue  ),
             RecipeCategories( "beef", R.drawable.beef ),
             RecipeCategories(  "breakfast", R.drawable.breakfast ),
@@ -38,10 +37,10 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list) {
             RecipeCategories(  "wine", R.drawable.wine)
         )
 
-        adapterRecipes =
-            RecipeListAdapter(
-                recipeList
-            )
+    }
+    private fun initRecyclerView() {
+
+        adapterRecipes =  RecipeListAdapter(setCategories()  )
         rvRecipeList.apply {
             adapter = adapterRecipes
             layoutManager = GridLayoutManager(activity, 2)
