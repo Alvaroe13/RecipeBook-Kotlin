@@ -3,18 +3,33 @@ package com.example.recipereaderkotlin.views.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.recipereaderkotlin.R
-import com.example.recipereaderkotlin.models.Recipe
 import com.example.recipereaderkotlin.models.RecipeCategories
 import kotlinx.android.synthetic.main.categories_list_layout.view.*
 
 class RecipeListAdapter(
-    var recipeCategories : List<RecipeCategories>
+    private val recipeCategories : List<RecipeCategories>,
+    private val clickListener : ClickHandler
 ): RecyclerView.Adapter<RecipeListAdapter.RecipeListViewHolder> () {
 
-    inner class RecipeListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+    inner class RecipeListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener{
+
+        init{
+            itemView.setOnClickListener(this)
+        }
+
+        override fun onClick(v: View?) {
+            val position = adapterPosition
+            if(position != RecyclerView.NO_POSITION){
+                clickListener.itemClick(position)
+            }
+        }
+    }
+
+    interface ClickHandler{
+        fun itemClick(position : Int)
+    }
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecipeListViewHolder {
