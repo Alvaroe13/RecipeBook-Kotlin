@@ -16,9 +16,11 @@ class RecipeListAdapter(
     inner class RecipeListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener{
 
         init{
+            //to be able to handle clicks in fragment
             itemView.setOnClickListener(this)
         }
 
+        //to be able to handle clicks in fragment
         override fun onClick(v: View?) {
             val position = adapterPosition
             if(position != RecyclerView.NO_POSITION){
@@ -27,6 +29,7 @@ class RecipeListAdapter(
         }
     }
 
+    //to be able to handle clicks in fragment
     interface ClickHandler{
         fun itemClick(position : Int)
     }
