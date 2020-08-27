@@ -6,7 +6,20 @@
     app:startDestination="@id/recipeListFragment">
     <fragment
         android:id="@+id/recipeListFragment"
-        android:name="com.example.recipereaderkotlin.views.RecipeListFragment"
+        android:name="com.example.recipereaderkotlin.views.CategoriesListFragment"
         android:label="fragment_recipe_list"
-        tools:layout="@layout/fragment_recipe_list" />
+        tools:layout="@layout/fragment_recipe_list" >
+        <action
+            android:id="@+id/action_recipeListFragment_to_recipeListFragment2"
+            app:destination="@id/recipeListFragment2" />
+    </fragment>
+    <fragment
+        android:id="@+id/recipeListFragment2"
+        android:name="com.example.recipereaderkotlin.views.RecipeListFragment"
+        android:label="fragment_recipe_list2"
+        tools:layout="@layout/fragment_recipe_list2" >
+        <argument
+            android:name="CategoryClicked"
+            app:argType="string" />
+    </fragment>
 </navigation>

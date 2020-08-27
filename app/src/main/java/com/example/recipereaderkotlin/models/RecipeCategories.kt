@@ -1,6 +1,8 @@
 package com.example.recipereaderkotlin.models
 
+import java.io.Serializable
+
 data class RecipeCategories (
-    val title : String,
-    val image : Int
-)
+    var title : String,
+    var image : Int
+) : Serializable
