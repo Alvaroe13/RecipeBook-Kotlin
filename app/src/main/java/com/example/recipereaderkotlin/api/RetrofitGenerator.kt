@@ -27,10 +27,13 @@ class RetrofitGenerator {
                 .client(connectionClient)
                 .build()
         }
+
+
+        val apiConnection by lazy {
+            retrofitInstance.create(Api::class.java)
+        }
+
     }
 
-    val serverConnection by lazy {
-        retrofitInstance.create(Api::class.java)
-    }
 
 }
