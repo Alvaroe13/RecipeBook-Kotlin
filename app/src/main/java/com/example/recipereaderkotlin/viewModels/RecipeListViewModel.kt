@@ -3,7 +3,7 @@ package com.example.recipereaderkotlin.viewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.recipereaderkotlin.models.Recipe
+import com.example.recipereaderkotlin.models.RecipeResponse
 import com.example.recipereaderkotlin.repositories.RecipeListRepository
 import com.example.recipereaderkotlin.utils.Resource
 import kotlinx.coroutines.launch
@@ -14,7 +14,7 @@ class RecipeListViewModel(
 )  : ViewModel() {
 
 
-    val recipeListResponse: MutableLiveData<Resource<Recipe>> = MutableLiveData()
+    val recipeListResponse: MutableLiveData<Resource<RecipeResponse>> = MutableLiveData()
 
     var pageNumber = 1
 
@@ -29,7 +29,7 @@ class RecipeListViewModel(
     /**
      * here we process the api response using the Resource class
      */
-    private fun handleResponse(response: Response<Recipe>) : Resource<Recipe>{
+    private fun handleResponse(response: Response<RecipeResponse>) : Resource<RecipeResponse>{
 
         println("RecipeListViewModel, handleResponse called")
           if(response.isSuccessful){

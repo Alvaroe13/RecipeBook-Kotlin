@@ -6,8 +6,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.recipereaderkotlin.R
 import com.example.recipereaderkotlin.models.Recipe
+import kotlinx.android.synthetic.main.recipe_list_item_layout.view.*
 
 class RecipeListAdapter : RecyclerView.Adapter<RecipeListAdapter.RecipeListViewHolder>() {
 
@@ -39,7 +41,12 @@ class RecipeListAdapter : RecyclerView.Adapter<RecipeListAdapter.RecipeListViewH
 
     override fun onBindViewHolder(holder: RecipeListViewHolder, position: Int) {
         val recipeList = differAsync.currentList[position]
-        holder.itemView.apply { }
+        holder.itemView.apply {
+            Glide.with(this).load(recipeList.image_url).into(ivRecipeList)
+            tvTitleRecipeList.text = recipeList.title
+            tvAuthorRecipeList.text = recipeList.publisher
+            tvRatingRecipeList.text = recipeList.social_rank.toString()
+        }
     }
 
     inner class RecipeListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
