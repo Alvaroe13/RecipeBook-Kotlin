@@ -2,7 +2,6 @@ package com.example.recipereaderkotlin.views
 
 import android.os.Bundle
 import android.view.View
-import android.widget.ProgressBar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -11,9 +10,7 @@ import com.example.recipereaderkotlin.models.Recipe
 import com.example.recipereaderkotlin.utils.Resource
 import com.example.recipereaderkotlin.viewModels.RecipeListViewModel
 import com.example.recipereaderkotlin.views.adapters.RecipeListAdapter
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_recipe_list.*
-import kotlinx.android.synthetic.main.recipe_list_item_layout.*
 
 
 class RecipeListFragment : Fragment(R.layout.fragment_recipe_list) {
