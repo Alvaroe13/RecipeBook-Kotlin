@@ -44,6 +44,14 @@
         android:visibility="visible"
         android:layout_gravity="center"/>
 
+    <ImageView
+        android:id="@+id/ivTimeOut"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:visibility="gone"
+        android:src="@drawable/ic_launcher_background"
+        android:scaleType="centerCrop"/>
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
