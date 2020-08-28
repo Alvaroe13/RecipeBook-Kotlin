@@ -11,8 +11,33 @@ import com.example.recipereaderkotlin.R
 import com.example.recipereaderkotlin.models.Recipe
 import kotlinx.android.synthetic.main.recipe_list_item_layout.view.*
 
-class RecipeListAdapter : RecyclerView.Adapter<RecipeListAdapter.RecipeListViewHolder>() {
+class RecipeListAdapter(
+    private val listener : ClickHandler //needed to handle click event from fragment
+) : RecyclerView.Adapter<RecipeListAdapter.RecipeListViewHolder>() {
 
+
+    inner class RecipeListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener{
+
+        //--------------------------- click event handler--------------------------------//
+
+        init {
+            itemView.setOnClickListener(this)
+        }
+
+        override fun onClick(v: View?) {
+             val position = adapterPosition
+            if (position != RecyclerView.NO_POSITION){
+                listener.itemClick(position)
+            }
+        }
+
+    }
+
+    interface ClickHandler{
+        fun itemClick(position: Int)
+    }
+
+    //-------------------------diff util------------------------------//
 
     private val differInfoCallback = object : DiffUtil.ItemCallback<Recipe>() {
 
@@ -28,6 +53,8 @@ class RecipeListAdapter : RecyclerView.Adapter<RecipeListAdapter.RecipeListViewH
 
     val differAsync = AsyncListDiffer(this, differInfoCallback)
 
+
+    //--------------------recycler override funcs ------------------------//
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecipeListViewHolder {
@@ -49,5 +76,5 @@ class RecipeListAdapter : RecyclerView.Adapter<RecipeListAdapter.RecipeListViewH
         }
     }
 
-    inner class RecipeListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+
 }

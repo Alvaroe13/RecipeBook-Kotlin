@@ -2,6 +2,7 @@ package com.example.recipereaderkotlin.views
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,17 +22,19 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
 
-class RecipeListFragment : Fragment(R.layout.fragment_recipe_list) {
+class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAdapter.ClickHandler {
 
     private lateinit var incomingInfo: String
     private lateinit var adapterRecipeList: RecipeListAdapter
     private lateinit var viewModel: RecipeListViewModel
     private lateinit var layout: View
 
+    private var recipeList = listOf<Recipe>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //by getting the category title here we can send the request to the server
         incomingInfo = arguments?.getString("CategoryClicked")!!
     }
 
@@ -55,7 +58,7 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list) {
     }
 
     private fun initRecycler() {
-        adapterRecipeList = RecipeListAdapter()
+        adapterRecipeList = RecipeListAdapter(this)
         rvRecipeList.apply {
             adapter = adapterRecipeList
             layoutManager = LinearLayoutManager(activity)
@@ -126,6 +129,9 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list) {
      * here we feed the DiffUtil list in adapter
      */
     private fun showRecipeList(list: MutableList<Recipe>) {
+        /*by setting recipeList = list we can then fetch recipe's info (title and
+        author in this case) in itemClick function when item is pressed and sent it to RecipeDetailsFragment*/
+        recipeList = list
         println("RecipeListFragment fed")
         adapterRecipeList.differAsync.submitList(list)
     }
@@ -138,6 +144,11 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list) {
     private fun hideProgressBar() {
         println("RecipeListFragment, progressBar hide")
         pbRecipeList.visibility = View.INVISIBLE
+    }
+
+    override fun itemClick(position: Int ) {
+        val recipes = recipeList[position]
+         Toast.makeText(context, "position = $position , title =  ${recipes.title}", Toast.LENGTH_SHORT).show()
     }
 
 }
