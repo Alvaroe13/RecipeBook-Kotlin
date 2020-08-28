@@ -13,13 +13,13 @@ import com.example.recipereaderkotlin.R
 import com.example.recipereaderkotlin.models.RecipeCategories
 import com.example.recipereaderkotlin.utils.Resource
 import com.example.recipereaderkotlin.viewModels.RecipeListViewModel
-import com.example.recipereaderkotlin.views.adapters.RecipeListAdapter
+import com.example.recipereaderkotlin.views.adapters.CategoriesListAdapter
 import kotlinx.android.synthetic.main.fragment_categories_list.*
 
-class CategoriesListFragment : Fragment(R.layout.fragment_categories_list), RecipeListAdapter.ClickHandler {
+class CategoriesListFragment : Fragment(R.layout.fragment_categories_list), CategoriesListAdapter.ClickHandler {
 
     private lateinit var navController : NavController
-    private lateinit var adapterRecipes : RecipeListAdapter
+    private lateinit var adapterRecipes : CategoriesListAdapter
     private lateinit var viewModel:RecipeListViewModel
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -51,8 +51,8 @@ class CategoriesListFragment : Fragment(R.layout.fragment_categories_list), Reci
         )
     }
     private fun initRecyclerView() {
-        adapterRecipes =  RecipeListAdapter(setCategories(), this )
-        rvRecipeList.apply {
+        adapterRecipes =  CategoriesListAdapter(setCategories(), this )
+        rvCategoriesList.apply {
             adapter = adapterRecipes
             layoutManager = GridLayoutManager(activity, 2)
         }
@@ -74,7 +74,7 @@ class CategoriesListFragment : Fragment(R.layout.fragment_categories_list), Reci
             when(apiResponse){
                 is Resource.Success ->{
                     if (apiResponse.data != null) {
-                        println("CategoriesListFragment, response = successful")
+                        println("CategoriesListFragment, response = successful with TITLE=${apiResponse.data.title}")
                     } else{
                         println("CategoriesListFragment, response = successful but null")
                     }

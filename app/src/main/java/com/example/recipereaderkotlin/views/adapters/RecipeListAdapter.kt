@@ -3,52 +3,44 @@ package com.example.recipereaderkotlin.views.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.recipereaderkotlin.R
-import com.example.recipereaderkotlin.models.RecipeCategories
-import kotlinx.android.synthetic.main.categories_list_layout.view.*
+import com.example.recipereaderkotlin.models.Recipe
 
-class RecipeListAdapter(
-    private val recipeCategories : List<RecipeCategories>,
-    private val clickListener : ClickHandler
-): RecyclerView.Adapter<RecipeListAdapter.RecipeListViewHolder> () {
+class RecipeListAdapter : RecyclerView.Adapter<RecipeListAdapter.RecipeListViewHolder>() {
 
-    inner class RecipeListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener{
 
-        init{
-            //to be able to handle clicks in fragment
-            itemView.setOnClickListener(this)
+    private val differInfoCallback = object : DiffUtil.ItemCallback<Recipe>() {
+
+        override fun areItemsTheSame(oldItem: Recipe, newItem: Recipe): Boolean {
+            return oldItem.source_url == newItem.source_url
         }
 
-        //to be able to handle clicks in fragment
-        override fun onClick(v: View?) {
-            val position = adapterPosition
-            if(position != RecyclerView.NO_POSITION){
-                clickListener.itemClick(position)
-            }
+        override fun areContentsTheSame(oldItem: Recipe, newItem: Recipe): Boolean {
+            return oldItem.equals(newItem)
         }
+
     }
 
-    //to be able to handle clicks in fragment
-    interface ClickHandler{
-        fun itemClick(position : Int)
-    }
+    val differAsync = AsyncListDiffer(this, differInfoCallback)
+
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecipeListViewHolder {
-        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.categories_list_layout, parent, false)
+        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.recipe_list_item_layout,parent, false)
         return RecipeListViewHolder(itemView)
     }
 
-    override fun getItemCount() = recipeCategories.size
-
-    override fun onBindViewHolder(holder: RecipeListViewHolder, position: Int) {
-        holder.itemView.apply {
-
-           tvRecipe.text = recipeCategories[position].title
-           cvRecipe.setImageResource(recipeCategories[position].image)
-
-        }
+    override fun getItemCount(): Int {
+        return differAsync.currentList.size
     }
 
+    override fun onBindViewHolder(holder: RecipeListViewHolder, position: Int) {
+        val recipeList = differAsync.currentList[position]
+        holder.itemView.apply { }
+    }
+
+    inner class RecipeListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 }
