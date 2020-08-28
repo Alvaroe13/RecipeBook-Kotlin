@@ -1,4 +1,4 @@
-package com.example.recipereaderkotlin.views
+package com.example.recipereaderkotlin.views.fragments
 
 import android.os.Bundle
 import android.view.View
@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.example.recipereaderkotlin.R
 import com.example.recipereaderkotlin.models.RecipeCategories
 import com.example.recipereaderkotlin.viewModels.RecipeListViewModel
+import com.example.recipereaderkotlin.views.MainActivity
 import com.example.recipereaderkotlin.views.adapters.CategoriesListAdapter
 import kotlinx.android.synthetic.main.fragment_categories_list.*
 

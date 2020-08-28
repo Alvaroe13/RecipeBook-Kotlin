@@ -1,5 +1,6 @@
 package com.example.recipereaderkotlin.api
 
+import com.example.recipereaderkotlin.models.Recipe
 import com.example.recipereaderkotlin.models.RecipeResponse
 import retrofit2.Response
 import retrofit2.http.GET
@@ -13,7 +14,7 @@ interface Api {
         @Query("page") pageNumber : String) : Response<RecipeResponse>
 
     @GET("api/get") //fetch recipes details from server
-    suspend fun getRecipeDtails(
+    suspend fun getRecipeDetails(
         @Query("rId") recipeId : String
-    )
+    ) : Response<Recipe>
 }

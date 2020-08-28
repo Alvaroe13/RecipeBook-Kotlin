@@ -8,5 +8,8 @@ class RecipeListRepository {
     suspend fun fetchRecipeList(optionSelected: String, pageNumber: Int)  =
         RetrofitGenerator.apiConnection.getRecipeList(optionSelected, pageNumber.toString())
 
+    suspend fun getRecipeDetails(recipeId : String) =
+        RetrofitGenerator.apiConnection.getRecipeDetails(recipeId)
+
 
 }

@@ -1,16 +1,21 @@
-package com.example.recipereaderkotlin.views
+package com.example.recipereaderkotlin.views.fragments
 
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.navigation.NavController
+import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.recipereaderkotlin.R
 import com.example.recipereaderkotlin.models.Recipe
 import com.example.recipereaderkotlin.utils.Constants.Companion.JOB_TIMEOUT
 import com.example.recipereaderkotlin.utils.Resource
 import com.example.recipereaderkotlin.viewModels.RecipeListViewModel
+import com.example.recipereaderkotlin.views.MainActivity
 import com.example.recipereaderkotlin.views.adapters.RecipeListAdapter
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_recipe_list.*
@@ -28,6 +33,8 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
     private lateinit var adapterRecipeList: RecipeListAdapter
     private lateinit var viewModel: RecipeListViewModel
     private lateinit var layout: View
+    private lateinit var navController : NavController
+
 
     private var recipeList = listOf<Recipe>()
 
@@ -47,6 +54,8 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
         viewModel = (activity as MainActivity).viewModel
         //toolbar title
         tvToolbarTitle.text = incomingInfo
+        //nav component
+        navController = Navigation.findNavController(view)
         initRecycler()
         requestRecipeList(incomingInfo)
 
@@ -146,9 +155,17 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
         pbRecipeList.visibility = View.INVISIBLE
     }
 
+
+
+    private fun openRecipe(title : String, image :String, rating: Double, recipeId: String){
+        val bundle = bundleOf("title" to title, "image" to image, "rating" to rating , "recipeId" to recipeId )
+        findNavController().navigate(R.id.action_recipeListFragment2_to_recipeDetailsFragment, bundle)
+    }
+
     override fun itemClick(position: Int ) {
         val recipes = recipeList[position]
-         Toast.makeText(context, "position = $position , title =  ${recipes.title}", Toast.LENGTH_SHORT).show()
+        openRecipe(recipes.title, recipes.image_url, recipes.social_rank, recipes.recipe_id)
+        // Toast.makeText(context, "position = $position , title =  ${recipes.title}", Toast.LENGTH_SHORT).show()
     }
 
 }
