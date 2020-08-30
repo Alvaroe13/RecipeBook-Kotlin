@@ -2,7 +2,6 @@ package com.example.recipereaderkotlin.views.fragments
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -43,6 +42,9 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
         super.onCreate(savedInstanceState)
         //by getting the category title here we can send the request to the server
         incomingInfo = arguments?.getString("CategoryClicked")!!
+        //viewModel wired from activity
+        viewModel = (activity as MainActivity).viewModel
+        requestRecipeList(incomingInfo)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -50,14 +52,11 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
 
         //without this we can't launch SnackBar when handling network time out
         layout = view
-        //viewModel wired from activity
-        viewModel = (activity as MainActivity).viewModel
         //toolbar title
         tvToolbarTitle.text = incomingInfo
         //nav component
         navController = Navigation.findNavController(view)
         initRecycler()
-        requestRecipeList(incomingInfo)
 
 
         CoroutineScope(IO).launch {
@@ -91,7 +90,6 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
             viewModel.recipeListResponse.observe(viewLifecycleOwner, Observer { apiResponse ->
                 when (apiResponse) {
                     is Resource.Success -> {
-                        hideProgressBar()
                         if (apiResponse.data != null) {
                             println("RecipeListFragment, response = successful with SIZE=${apiResponse.data.recipes.size}")
                             showRecipeList(apiResponse.data.recipes)
@@ -143,6 +141,7 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
         recipeList = list
         println("RecipeListFragment fed")
         adapterRecipeList.differAsync.submitList(list)
+        hideProgressBar()
     }
 
     private fun showProgressBar() {
@@ -165,7 +164,6 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
     override fun itemClick(position: Int ) {
         val recipes = recipeList[position]
         openRecipe(recipes.title, recipes.image_url, recipes.social_rank, recipes.recipe_id)
-        // Toast.makeText(context, "position = $position , title =  ${recipes.title}", Toast.LENGTH_SHORT).show()
     }
 
 }

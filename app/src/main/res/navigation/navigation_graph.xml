@@ -11,7 +11,11 @@
         tools:layout="@layout/fragment_categories_list" >
         <action
             android:id="@+id/action_recipeListFragment_to_recipeListFragment2"
-            app:destination="@id/recipeListFragment2" />
+            app:destination="@id/recipeListFragment2"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"/>
     </fragment>
     <fragment
         android:id="@+id/recipeListFragment2"
@@ -23,7 +27,11 @@
             app:argType="string" />
         <action
             android:id="@+id/action_recipeListFragment2_to_recipeDetailsFragment"
-            app:destination="@id/recipeDetailsFragment" />
+            app:destination="@id/recipeDetailsFragment"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"/>
     </fragment>
     <fragment
         android:id="@+id/recipeDetailsFragment"
