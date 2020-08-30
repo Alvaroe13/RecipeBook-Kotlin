@@ -3,7 +3,6 @@ package com.example.recipereaderkotlin.viewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.recipereaderkotlin.models.Recipe
 import com.example.recipereaderkotlin.models.RecipeDetails
 import com.example.recipereaderkotlin.models.RecipeResponse
 import com.example.recipereaderkotlin.repositories.RecipeListRepository

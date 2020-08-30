@@ -2,6 +2,8 @@ package com.example.recipereaderkotlin.views.fragments
 
 import android.os.Bundle
 import android.view.View
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
@@ -31,7 +33,6 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
         //without this we can't launch SnackBar when handling network time out
         layout = view
         incomingData()
-
     }
 
     private fun incomingData() {
@@ -50,20 +51,6 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
 
     }
 
-    private fun setData(title: String?, image: String?, rating: String?) {
-        Glide.with(this).load(image).into(ivRecipeDetails)
-        tvTitleRecipeDetails.text = title
-        tvRatingRecipeDetails.text = rating
-    }
-
-    private fun makeVisible() {
-        ivRecipeDetails.visibility = View.VISIBLE
-        tvTitleRecipeDetails.visibility = View.VISIBLE
-        tvRatingRecipeDetails.visibility = View.VISIBLE
-        tvIngredientsDetails.visibility = View.VISIBLE
-        tvIngredients.visibility = View.VISIBLE
-    }
-
     /**
      * actual connection with server in order to request ingredients details
      */
@@ -77,12 +64,14 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
             println("RecipeDetailsFragment, subscribeObserver, response = $response ")
             when (response) {
                 is Resource.Success -> {
-                    hideProgressBar()
                     if (response.data != null) {
-                        println("RecipeDetailsFragment, subscribeObserver, final response = ${response.data.recipe.recipeDetails}")
-                        for (i in response.data.recipe.recipeDetails.iterator()) {
-                            makeVisible()
-                            tvIngredients.text = i
+                        //erase ingredients from the view
+                        llIngredients.removeAllViews()
+                        //add ingredients to the view
+                        for (i: String in response.data.recipe.recipeDetails) {
+                            println("debugging, value of i = $i")
+                            setIngredientList(i)
+                            hideProgressBar()
                         }
                     }
                 }
@@ -112,11 +101,7 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
     /**
      * this one handles network timeout, it will only get triggered if network request takes longer than 3 secs
      */
-    private suspend fun secureRecipeDetailsRetrieval(
-        title: String?,
-        image: String?,
-        rating: String?
-    ) {
+    private suspend fun secureRecipeDetailsRetrieval(title: String?,image: String?,rating: String?) {
         withContext(Dispatchers.IO) {
             val job = withTimeoutOrNull(Constants.JOB_TIMEOUT) {
                 withContext(Dispatchers.Main) {
@@ -137,6 +122,40 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
                 }
             }
         }
+    }
+
+    /**
+     * we set the ingredients coming from the server request
+     */
+    private fun setIngredientList(i : String){
+
+        val textField = TextView(context)
+        textField.text = i
+        textField.textSize = 15F
+        val textLayout = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        textField.layoutParams = textLayout
+        llIngredients.addView(textField)
+        makeVisible()
+    }
+
+    /**
+     * we set image, social rank and title with incoming data from RecipeListFragment
+     */
+    private fun setData(title: String?, image: String?, rating: String?) {
+        Glide.with(this).load(image).into(ivRecipeDetails)
+        tvTitleRecipeDetails.text = title
+        tvRatingRecipeDetails.text = rating
+    }
+
+    /**
+     * all views are invisible by default so we make them visible by using this method
+     */
+    private fun makeVisible() {
+        ivRecipeDetails.visibility = View.VISIBLE
+        tvTitleRecipeDetails.visibility = View.VISIBLE
+        tvRatingRecipeDetails.visibility = View.VISIBLE
+        tvIngredientsDetails.visibility = View.VISIBLE
+        llIngredients.visibility = View.VISIBLE
     }
 
 
