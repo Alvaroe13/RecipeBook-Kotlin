@@ -18,12 +18,9 @@ import com.example.recipereaderkotlin.views.MainActivity
 import com.example.recipereaderkotlin.views.adapters.RecipeListAdapter
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_recipe_list.*
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
 
 
 class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAdapter.ClickHandler {
@@ -32,7 +29,7 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
     private lateinit var adapterRecipeList: RecipeListAdapter
     private lateinit var viewModel: RecipeListViewModel
     private lateinit var layout: View
-    private lateinit var navController : NavController
+    private lateinit var navController: NavController
 
 
     private var recipeList = listOf<Recipe>()
@@ -58,9 +55,26 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
         navController = Navigation.findNavController(view)
         initRecycler()
 
+        connectionToServer()
+
+    }
+
+    private fun connectionToServer() {
 
         CoroutineScope(IO).launch {
-            secureRecipeRetrieval()
+
+            val hasInternet = viewModel.checkInternetConnection()
+
+            if (hasInternet) {
+                secureRecipeRetrieval()
+            } else {
+                //use job timeout to make user experience better before showing error message in snackBar
+                delay(JOB_TIMEOUT)
+                hideProgressBar()
+                Snackbar.make(layout, "No internet connection", Snackbar.LENGTH_LONG).show()
+                println("RecipeListFragment, NO internet connection")
+            }
+
         }
 
     }
@@ -87,46 +101,47 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
      */
     private fun subscribeObserver() {
 
-            viewModel.recipeListResponse.observe(viewLifecycleOwner, Observer { apiResponse ->
-                when (apiResponse) {
-                    is Resource.Success -> {
-                        if (apiResponse.data != null) {
-                            println("RecipeListFragment, response = successful with SIZE=${apiResponse.data.recipes.size}")
-                            showRecipeList(apiResponse.data.recipes)
-                        } else {
-                            println("RecipeListFragment, response = successful but null")
-                        }
-                    }
-                    is Resource.Error -> {
-                        hideProgressBar()
-                        println("RecipeListFragment, Error = ${apiResponse.message}")
-                    }
-                    is Resource.Loading -> {
-                        showProgressBar()
-                        println("RecipeListFragment, loading state...")
+        viewModel.recipeListResponse.observe(viewLifecycleOwner, Observer { apiResponse ->
+            when (apiResponse) {
+                is Resource.Success -> {
+                    if (apiResponse.data != null) {
+                        println("RecipeListFragment, response = successful with SIZE=${apiResponse.data.recipes.size}")
+                        showRecipeList(apiResponse.data.recipes)
+                    } else {
+                        println("RecipeListFragment, response = successful but null")
                     }
                 }
+                is Resource.Error -> {
+                    hideProgressBar()
+                    println("RecipeListFragment, Error = ${apiResponse.message}")
+                }
+                is Resource.Loading -> {
+                    showProgressBar()
+                    println("RecipeListFragment, loading state...")
+                }
+            }
 
-            })
+        })
 
     }
 
     /**
      * this one handles network timeout, it will only get triggered if network request takes longer than 3 secs
      */
-    private suspend fun secureRecipeRetrieval(){
-        withContext(IO){
-            val job = withTimeoutOrNull(JOB_TIMEOUT){
-                withContext(Main){
+    private suspend fun secureRecipeRetrieval() {
+        withContext(IO) {
+            val job = withTimeoutOrNull(JOB_TIMEOUT) {
+                withContext(Main) {
                     println("RecipeListFragment, withContext called")
                     subscribeObserver()
                 }
             }
-            if (job == null){
-                withContext(Main){
+            if (job == null) {
+                withContext(Main) {
                     hideProgressBar()
                     ivTimeOut.visibility = View.VISIBLE
-                    Snackbar.make(layout, "Something went wrong, check internet connection", Snackbar.LENGTH_LONG).show()
+                    Snackbar.make(layout, "Something went wrong, try again", Snackbar.LENGTH_LONG)
+                        .show()
                 }
             }
         }
@@ -155,13 +170,16 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
     }
 
 
-
-    private fun openRecipe(title : String, image :String, rating: Double, recipeId: String){
-        val bundle = bundleOf("title" to title, "image" to image, "rating" to rating , "recipeId" to recipeId )
-        findNavController().navigate(R.id.action_recipeListFragment2_to_recipeDetailsFragment, bundle)
+    private fun openRecipe(title: String, image: String, rating: Double, recipeId: String) {
+        val bundle =
+            bundleOf("title" to title, "image" to image, "rating" to rating, "recipeId" to recipeId)
+        findNavController().navigate(
+            R.id.action_recipeListFragment2_to_recipeDetailsFragment,
+            bundle
+        )
     }
 
-    override fun itemClick(position: Int ) {
+    override fun itemClick(position: Int) {
         val recipes = recipeList[position]
         openRecipe(recipes.title, recipes.image_url, recipes.social_rank, recipes.recipe_id)
     }

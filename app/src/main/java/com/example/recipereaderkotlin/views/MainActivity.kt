@@ -20,7 +20,8 @@ class MainActivity : AppCompatActivity() {
 
     fun initViewModel(){
         val repository  = RecipeListRepository()
-        val vmProviderFactory = ViewModelProviderFactory(repository)
+       // val application = ContextApplication()
+        val vmProviderFactory = ViewModelProviderFactory(repository,  application )
         viewModel = ViewModelProvider(this, vmProviderFactory).get(RecipeListViewModel::class.java)
     }
 }
