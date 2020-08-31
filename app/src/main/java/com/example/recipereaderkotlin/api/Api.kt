@@ -1,6 +1,5 @@
 package com.example.recipereaderkotlin.api
 
-import com.example.recipereaderkotlin.models.Recipe
 import com.example.recipereaderkotlin.models.RecipeDetails
 import com.example.recipereaderkotlin.models.RecipeResponse
 import retrofit2.Response
