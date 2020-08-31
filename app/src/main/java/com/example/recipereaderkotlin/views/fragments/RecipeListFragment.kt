@@ -37,11 +37,10 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //by getting the category title here we can send the request to the server
-        incomingInfo = arguments?.getString("CategoryClicked")!!
         //viewModel wired from activity
         viewModel = (activity as MainActivity).viewModel
-        requestRecipeList(incomingInfo)
+        //by getting the category title here we can send the request to the server
+         incomingData()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -58,15 +57,11 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
         retryButton()
     }
 
-    private fun retryButton() {
-        btnRetryRecipeList.setOnClickListener{
-            btnRetryRecipeList.visibility= View.INVISIBLE
-            showProgressBar()
-            incomingInfo = arguments?.getString("CategoryClicked")!!
-            println("Debugging, incomingInfo = $incomingInfo")
-            requestRecipeList(incomingInfo)
-            connectionToServer()
-        }
+
+    private fun incomingData(){
+        incomingInfo = arguments?.getString("CategoryClicked")!!
+        requestRecipeList(incomingInfo)
+        println("Debugging, incomingInfo = $incomingInfo")
     }
 
     /**
@@ -183,6 +178,18 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
     private fun hideProgressBar() {
         println("RecipeListFragment, progressBar hide")
         pbRecipeList.visibility = View.INVISIBLE
+    }
+
+    /**
+     * button retries connection to the server when there was no internet in previous request
+     */
+    private fun retryButton() {
+        btnRetryRecipeList.setOnClickListener{
+            btnRetryRecipeList.visibility= View.INVISIBLE
+            showProgressBar()
+            incomingData()
+            connectionToServer()
+        }
     }
 
 

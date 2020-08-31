@@ -39,6 +39,7 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
         //without this we can't launch SnackBar when handling network time out
         layout = view
         getRecipeDetails()
+        btnRetry()
 
     }
 
@@ -68,7 +69,6 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
 
     }
 
-
     /**
      * this one handles network timeout, it will only get triggered if network request takes longer than 3 secs
      */
@@ -90,7 +90,6 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
 
     }
 
-
     /**
      * actual connection with server in order to request ingredients details
      */
@@ -106,8 +105,8 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
         CoroutineScope(Main).launch {
             delay(JOB_TIMEOUT)
             hideProgressBar()
-            ivRecipeDetails.visibility = View.VISIBLE
-            tvTitleRecipeDetails.visibility = View.VISIBLE
+            makeVisible()
+            btnRetryRecipeDetails.visibility = View.VISIBLE
             tvTitleRecipeDetails.text = message
         }
 
@@ -119,7 +118,6 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
             when (response) {
                 is Resource.Success -> {
                     if (response.data != null) {
-
                         setData(title, image, rating)
                         //erase ingredients from the view
                         llIngredients.removeAllViews()
@@ -169,6 +167,7 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
         )
         textField.layoutParams = textLayout
         llIngredients.addView(textField)
+        llIngredients.visibility = View.VISIBLE
         makeVisible()
     }
 
@@ -190,6 +189,20 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
         tvRatingRecipeDetails.visibility = View.VISIBLE
         tvIngredientsDetails.visibility = View.VISIBLE
         llIngredients.visibility = View.VISIBLE
+    }
+
+    /**
+     * button retries connection to the server when there was no internet in previous request
+     */
+    private fun btnRetry() {
+        btnRetryRecipeDetails.setOnClickListener {
+            btnRetryRecipeDetails.visibility = View.INVISIBLE
+            ivRecipeDetails.visibility = View.INVISIBLE
+            tvTitleRecipeDetails.visibility = View.INVISIBLE
+            showProgressBar()
+            incomingData()
+            getRecipeDetails()
+        }
     }
 
 
