@@ -10,9 +10,8 @@ import com.bumptech.glide.Glide
 import com.example.recipereaderkotlin.R
 import com.example.recipereaderkotlin.utils.Constants.Companion.JOB_TIMEOUT
 import com.example.recipereaderkotlin.utils.Resource
-import com.example.recipereaderkotlin.viewModels.RecipeListViewModel
+import com.example.recipereaderkotlin.viewModels.RecipeViewModel
 import com.example.recipereaderkotlin.views.MainActivity
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_recipe_details.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
@@ -24,7 +23,7 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
     private lateinit var image: String
     private lateinit var recipeId: String
     private lateinit var rating: String
-    private lateinit var viewModel: RecipeListViewModel
+    private lateinit var viewModel: RecipeViewModel
     private lateinit var layout: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,7 +62,7 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
             if (hasConnection) {
                 secureRecipeDetailsRetrieval()
             } else {
-                noInternetConnection()
+                failLoadingInfoMessage("No internet connection...")
             }
         }
 
@@ -80,36 +79,17 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
             val job = withTimeoutOrNull(JOB_TIMEOUT) {
                 withContext(Main) {
                     println("RecipeListFragment, withContext called")
-                    setData(title, image, rating)
                     requestToServer(recipeId)
                 }
             }
             if (job == null) {
-                withContext(Main) {
-                    // hideProgressBar()
-                    ivRecipeDetails.visibility = View.VISIBLE
-                    tvTitleRecipeDetails.visibility = View.VISIBLE
-                    tvTitleRecipeDetails.text = "Error with the server..."
-                    Snackbar.make(layout, "Something went wrong, try again!", Snackbar.LENGTH_LONG)
-                        .show()
-                }
+                failLoadingInfoMessage("Error with the server...")
             }
         }
 
 
     }
 
-    private suspend fun noInternetConnection() {
-        println("RecipeDetailsFragment, NO internet connection")
-        //use job timeout to make user experience better before showing error message in snackBar
-        delay(JOB_TIMEOUT)
-        withContext(Main){
-            hideProgressBar()
-            ivRecipeDetails.visibility = View.VISIBLE
-            tvTitleRecipeDetails.visibility = View.VISIBLE
-            tvTitleRecipeDetails.text = "No internet connection..."
-        }
-    }
 
     /**
      * actual connection with server in order to request ingredients details
@@ -119,6 +99,20 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
         subscribeObserver()
     }
 
+
+    private fun failLoadingInfoMessage(message: String) {
+        println("RecipeDetailsFragment, failLoadingInfoMessage, called!")
+        //use job timeout to make user experience better before showing error message in snackBar
+        CoroutineScope(Main).launch {
+            delay(JOB_TIMEOUT)
+            hideProgressBar()
+            ivRecipeDetails.visibility = View.VISIBLE
+            tvTitleRecipeDetails.visibility = View.VISIBLE
+            tvTitleRecipeDetails.text = message
+        }
+
+    }
+
     private fun subscribeObserver() {
         viewModel.recipeDetail.observe(viewLifecycleOwner, Observer { response ->
             println("RecipeDetailsFragment, subscribeObserver, response = $response ")
@@ -126,6 +120,7 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
                 is Resource.Success -> {
                     if (response.data != null) {
 
+                        setData(title, image, rating)
                         //erase ingredients from the view
                         llIngredients.removeAllViews()
                         //add ingredients to the view
@@ -138,6 +133,7 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
                 }
                 is Resource.Error -> {
                     hideProgressBar()
+                    failLoadingInfoMessage("Error with the network")
                     println("RecipeListFragment, Error = ${response.message}")
                 }
                 is Resource.Loading -> {
@@ -157,7 +153,6 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
         println("RecipeListFragment, progressBar hide")
         pbRecipeDetails.visibility = View.INVISIBLE
     }
-
 
 
     /**

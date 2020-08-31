@@ -10,7 +10,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.recipereaderkotlin.R
 import com.example.recipereaderkotlin.models.RecipeCategories
-import com.example.recipereaderkotlin.viewModels.RecipeListViewModel
+import com.example.recipereaderkotlin.viewModels.RecipeViewModel
 import com.example.recipereaderkotlin.views.MainActivity
 import com.example.recipereaderkotlin.views.adapters.CategoriesListAdapter
 import kotlinx.android.synthetic.main.fragment_categories_list.*
@@ -19,7 +19,7 @@ class CategoriesListFragment : Fragment(R.layout.fragment_categories_list), Cate
 
     private lateinit var navController : NavController
     private lateinit var adapterRecipes : CategoriesListAdapter
-    private lateinit var viewModel:RecipeListViewModel
+    private lateinit var viewModel:RecipeViewModel
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

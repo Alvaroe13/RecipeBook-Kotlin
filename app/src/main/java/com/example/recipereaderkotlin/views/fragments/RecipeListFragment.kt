@@ -13,7 +13,7 @@ import com.example.recipereaderkotlin.R
 import com.example.recipereaderkotlin.models.Recipe
 import com.example.recipereaderkotlin.utils.Constants.Companion.JOB_TIMEOUT
 import com.example.recipereaderkotlin.utils.Resource
-import com.example.recipereaderkotlin.viewModels.RecipeListViewModel
+import com.example.recipereaderkotlin.viewModels.RecipeViewModel
 import com.example.recipereaderkotlin.views.MainActivity
 import com.example.recipereaderkotlin.views.adapters.RecipeListAdapter
 import com.google.android.material.snackbar.Snackbar
@@ -27,7 +27,7 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
 
     private lateinit var incomingInfo: String
     private lateinit var adapterRecipeList: RecipeListAdapter
-    private lateinit var viewModel: RecipeListViewModel
+    private lateinit var viewModel: RecipeViewModel
     private lateinit var layout: View
     private lateinit var navController: NavController
 
@@ -54,9 +54,35 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
         //nav component
         navController = Navigation.findNavController(view)
         initRecycler()
-
         connectionToServer()
+        retryButton()
+    }
 
+    private fun retryButton() {
+        btnRetryRecipeList.setOnClickListener{
+            btnRetryRecipeList.visibility= View.INVISIBLE
+            showProgressBar()
+            incomingInfo = arguments?.getString("CategoryClicked")!!
+            println("Debugging, incomingInfo = $incomingInfo")
+            requestRecipeList(incomingInfo)
+            connectionToServer()
+        }
+    }
+
+    /**
+     * this one makes the request to the api
+     */
+    private fun requestRecipeList(title: String) {
+        viewModel.getRecipeList(title)
+        println("RecipeListFragment, retrieveRecipeList called with $title")
+    }
+
+    private fun initRecycler() {
+        adapterRecipeList = RecipeListAdapter(this)
+        rvRecipeList.apply {
+            adapter = adapterRecipeList
+            layoutManager = LinearLayoutManager(activity)
+        }
     }
 
     private fun connectionToServer() {
@@ -70,31 +96,40 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
             } else {
                 //use job timeout to make user experience better before showing error message in snackBar
                 delay(JOB_TIMEOUT)
-                hideProgressBar()
-                Snackbar.make(layout, "No internet connection", Snackbar.LENGTH_LONG).show()
-                println("RecipeListFragment, NO internet connection")
+                errorLoadingMessage("No internet connection")
             }
 
         }
 
     }
 
-    private fun initRecycler() {
-        adapterRecipeList = RecipeListAdapter(this)
-        rvRecipeList.apply {
-            adapter = adapterRecipeList
-            layoutManager = LinearLayoutManager(activity)
+    /**
+     * this one handles network timeout, it will only get triggered if network request takes longer than 3 secs
+     */
+    private suspend fun secureRecipeRetrieval() {
+
+        val job = withTimeoutOrNull(JOB_TIMEOUT) {
+            withContext(Main) {
+                println("RecipeListFragment, withContext called")
+                subscribeObserver()
+            }
+        }
+        if (job == null) {
+            withContext(Main) {
+                errorLoadingMessage("Something went wrong, try again")
+            }
         }
     }
 
-
-    /**
-     * this one makes the request to the api
-     */
-    private fun requestRecipeList(title: String) {
-        viewModel.getRecipeList(title)
-        println("RecipeListFragment, retrieveRecipeList called with $title")
+    private fun errorLoadingMessage(message: String) {
+        CoroutineScope(Main).launch {
+            hideProgressBar()
+            btnRetryRecipeList.visibility = View.VISIBLE
+            Snackbar.make(layout, message, Snackbar.LENGTH_LONG).show()
+            println("RecipeListFragment, NO internet connection")
+        }
     }
+
 
     /**
      * this one retrieves the responds from the api
@@ -105,6 +140,7 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
             when (apiResponse) {
                 is Resource.Success -> {
                     if (apiResponse.data != null) {
+                        btnRetryRecipeList.visibility = View.INVISIBLE
                         println("RecipeListFragment, response = successful with SIZE=${apiResponse.data.recipes.size}")
                         showRecipeList(apiResponse.data.recipes)
                     } else {
@@ -112,7 +148,7 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
                     }
                 }
                 is Resource.Error -> {
-                    hideProgressBar()
+                    errorLoadingMessage("Network error...")
                     println("RecipeListFragment, Error = ${apiResponse.message}")
                 }
                 is Resource.Loading -> {
@@ -125,27 +161,7 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
 
     }
 
-    /**
-     * this one handles network timeout, it will only get triggered if network request takes longer than 3 secs
-     */
-    private suspend fun secureRecipeRetrieval() {
-        withContext(IO) {
-            val job = withTimeoutOrNull(JOB_TIMEOUT) {
-                withContext(Main) {
-                    println("RecipeListFragment, withContext called")
-                    subscribeObserver()
-                }
-            }
-            if (job == null) {
-                withContext(Main) {
-                    hideProgressBar()
-                    ivTimeOut.visibility = View.VISIBLE
-                    Snackbar.make(layout, "Something went wrong, try again", Snackbar.LENGTH_LONG)
-                        .show()
-                }
-            }
-        }
-    }
+
 
     /**
      * here we feed the DiffUtil list in adapter
@@ -173,10 +189,7 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
     private fun openRecipe(title: String, image: String, rating: Double, recipeId: String) {
         val bundle =
             bundleOf("title" to title, "image" to image, "rating" to rating, "recipeId" to recipeId)
-        findNavController().navigate(
-            R.id.action_recipeListFragment2_to_recipeDetailsFragment,
-            bundle
-        )
+        findNavController().navigate( R.id.action_recipeListFragment2_to_recipeDetailsFragment, bundle )
     }
 
     override fun itemClick(position: Int) {

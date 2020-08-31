@@ -20,7 +20,7 @@ import java.io.IOException
 /**
  * This viewModel will be shared with RecipeList and RecipeDetails fragments
  */
-class RecipeListViewModel(
+class RecipeViewModel(
     private val repository : RecipeListRepository,
     private val application : Application
 )  : ViewModel() {

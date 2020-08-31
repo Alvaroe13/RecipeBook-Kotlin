@@ -12,7 +12,7 @@ class ViewModelProviderFactory(  private val repository: RecipeListRepository, p
 
 
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return RecipeListViewModel( repository, application) as T
+        return RecipeViewModel( repository, application) as T
     }
 
 

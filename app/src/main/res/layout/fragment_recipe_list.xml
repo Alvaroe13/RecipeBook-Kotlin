@@ -44,13 +44,14 @@
         android:visibility="visible"
         android:layout_gravity="center"/>
 
-    <ImageView
-        android:id="@+id/ivTimeOut"
-        android:layout_width="match_parent"
-        android:layout_height="250dp"
-        android:visibility="gone"
-        android:src="@drawable/ic_launcher_background"
-        android:scaleType="centerCrop"/>
+    <Button
+        android:id="@+id/btnRetryRecipeList"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Retry"
+        android:visibility="invisible"
+        android:layout_gravity="center"/>
+
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
