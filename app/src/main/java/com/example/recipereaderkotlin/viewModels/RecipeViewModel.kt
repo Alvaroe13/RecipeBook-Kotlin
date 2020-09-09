@@ -33,8 +33,7 @@ class RecipeViewModel(
     //------------------------------Recipe List section ---------------------------------------//
 
     fun getRecipeList(optionSelected: String, pageNumber: Int)  = viewModelScope.launch{
-        println("RecipeListViewModel, getRecipeList, option selected: $optionSelected")
-        println("RecipeListViewModel, getRecipeList, page number: $pageNumber")
+        println("RecipeListViewModel, getRecipeList, option selected: $optionSelected and page number: $pageNumber")
         recipeListResponse.postValue(Resource.Loading())
 
         try {
@@ -53,15 +52,13 @@ class RecipeViewModel(
         }
     }
 
-    /**
-     * here we process the api response using the Resource class
-     */
+    /**  here we process the api response using the Resource class */
     private fun handleResponse(response: Response<RecipeResponse>) : Resource<RecipeResponse>{
 
         println("RecipeListViewModel, handleResponse, called")
           if(response.isSuccessful){
                 response.body()?.let {apiResponse ->
-                    println("RecipeListViewModel, handleResponse, successful and body NOT null")
+
                     if (recipeList == null){
                         println("RecipeListViewModel, handleResponse, recipeList is NULL")
                         recipeList = apiResponse
