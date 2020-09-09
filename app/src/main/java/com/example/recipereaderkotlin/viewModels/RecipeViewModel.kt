@@ -28,13 +28,13 @@ class RecipeViewModel(
 
     val recipeListResponse: MutableLiveData<Resource<RecipeResponse>> = MutableLiveData()
     val recipeDetail : MutableLiveData<Resource<RecipeDetails>> = MutableLiveData()
-
-    var pageNumber = 1
+    var recipeList : RecipeResponse? = null
 
     //------------------------------Recipe List section ---------------------------------------//
 
-    fun getRecipeList(optionSelected: String)  = viewModelScope.launch{
+    fun getRecipeList(optionSelected: String, pageNumber: Int)  = viewModelScope.launch{
         println("RecipeListViewModel, getRecipeList, option selected: $optionSelected")
+        println("RecipeListViewModel, getRecipeList, page number: $pageNumber")
         recipeListResponse.postValue(Resource.Loading())
 
         try {
@@ -60,9 +60,19 @@ class RecipeViewModel(
 
         println("RecipeListViewModel, handleResponse, called")
           if(response.isSuccessful){
-                response.body()?.let {
+                response.body()?.let {apiResponse ->
                     println("RecipeListViewModel, handleResponse, successful and body NOT null")
-                    return Resource.Success(it)
+                    if (recipeList == null){
+                        println("RecipeListViewModel, handleResponse, recipeList is NULL")
+                        recipeList = apiResponse
+                    }else{
+                        println("RecipeListViewModel, handleResponse, recipeList is NOT NULL")
+                        val oldRecipes = recipeList?.recipes
+                        val newRecipes = apiResponse.recipes
+                        oldRecipes?.addAll(newRecipes)
+                    }
+                    //here we pass recipeList, in case recipeList is null we pass apiResponse
+                    return Resource.Success(recipeList ?: apiResponse)
                }
            }
         println("RecipeListViewModel, handleResponse, response : ${response.message()}")

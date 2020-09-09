@@ -2,6 +2,7 @@ package com.example.recipereaderkotlin.views.fragments
 
 import android.os.Bundle
 import android.view.View
+import android.widget.AbsListView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -9,9 +10,12 @@ import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.recipereaderkotlin.R
 import com.example.recipereaderkotlin.models.Recipe
 import com.example.recipereaderkotlin.utils.Constants.Companion.JOB_TIMEOUT
+import com.example.recipereaderkotlin.utils.Constants.Companion.PAGE_NUMBER
+import com.example.recipereaderkotlin.utils.Constants.Companion.QUERY_PAGE_SIZE
 import com.example.recipereaderkotlin.utils.Resource
 import com.example.recipereaderkotlin.viewModels.RecipeViewModel
 import com.example.recipereaderkotlin.views.MainActivity
@@ -25,20 +29,26 @@ import kotlinx.coroutines.Dispatchers.Main
 
 class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAdapter.ClickHandler {
 
-    private lateinit var incomingInfo: String
+    private lateinit var optionSelected: String
     private lateinit var adapterRecipeList: RecipeListAdapter
     private lateinit var viewModel: RecipeViewModel
     private lateinit var layout: View
     private lateinit var navController: NavController
-
-
     private var recipeList = listOf<Recipe>()
+
+    //pagination
+    private var pageNumber = PAGE_NUMBER
+    private var isLoading = false
+    private var isScrolling = false
+    private var resultsNumber = 0
+    lateinit var layoutManagerRecycler: LinearLayoutManager
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //viewModel wired from activity
         viewModel = (activity as MainActivity).viewModel
+        viewModel.recipeList = null
         //by getting the category title here we can send the request to the server
         incomingData()
     }
@@ -48,9 +58,7 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
 
         //without this we can't launch SnackBar when handling network time out
         layout = view
-        //toolbar title
-        tvToolbarTitle.text = incomingInfo
-        //nav component
+        tvToolbarTitle.text = optionSelected
         navController = Navigation.findNavController(view)
         initRecycler()
         connectionToServer()
@@ -59,24 +67,26 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
 
 
     private fun incomingData() {
-        incomingInfo = arguments?.getString("CategoryClicked")!!
-        requestRecipeList(incomingInfo)
-        println("Debugging, incomingInfo = $incomingInfo")
+        optionSelected = arguments?.getString("CategoryClicked")!!
+        println("Debugging, incomingInfo = $optionSelected")
     }
 
     /**
      * this one makes the request to the api
      */
-    private fun requestRecipeList(title: String) {
-        viewModel.getRecipeList(title)
+    private fun requestRecipeList(title: String, pageNumber: Int) {
+        isLoading = true
+        viewModel.getRecipeList(title, pageNumber)
         println("RecipeListFragment, retrieveRecipeList called with $title")
     }
 
     private fun initRecycler() {
         adapterRecipeList = RecipeListAdapter(this)
+        layoutManagerRecycler = LinearLayoutManager(activity)
         rvRecipeList.apply {
             adapter = adapterRecipeList
-            layoutManager = LinearLayoutManager(activity)
+            layoutManager = layoutManagerRecycler
+            addOnScrollListener(customScrollListener)
         }
     }
 
@@ -87,6 +97,7 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
             val hasInternet = viewModel.checkInternetConnection()
 
             if (hasInternet) {
+                requestRecipeList(optionSelected, pageNumber)
                 secureRecipeRetrieval()
             } else {
                 //use job timeout to make user experience better before showing error message in snackBar
@@ -134,12 +145,15 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
         viewModel.recipeListResponse.observe(viewLifecycleOwner, Observer { apiResponse ->
             when (apiResponse) {
                 is Resource.Success -> {
-                    if (apiResponse.data != null) {
+                    if (apiResponse.data != null ) {
+                        isLoading = false
+                        resultsNumber = apiResponse.data.count
+                        println("DEBUG, result number is = $resultsNumber")
                         if (apiResponse.data.recipes.size > 0) {
                             btnRetryRecipeList.visibility = View.INVISIBLE
                             println("RecipeListFragment, response = successful with SIZE=${apiResponse.data.recipes.size}")
-                            showRecipeList(apiResponse.data.recipes)
-                        } else {
+                            showRecipeList(apiResponse.data.recipes.toList())
+                        } else  {
                             println("RecipeListFragment, response = NO RESULT FOUND :(")
                             showImageNotFound()
                         }
@@ -170,7 +184,7 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
     /**
      * here we feed the DiffUtil list in adapter
      */
-    private fun showRecipeList(list: MutableList<Recipe>) {
+    private fun showRecipeList(list: List<Recipe>) {
         /*by setting recipeList = list we can then fetch recipe's info (title and
         author in this case) in itemClick function when item is pressed and sent it to RecipeDetailsFragment*/
         recipeList = list
@@ -180,10 +194,12 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
     }
 
     private fun showProgressBar() {
+        isLoading = true
         pbRecipeList.visibility = View.VISIBLE
     }
 
     private fun hideProgressBar() {
+        isLoading = false
         pbRecipeList.visibility = View.INVISIBLE
     }
 
@@ -199,7 +215,6 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
         }
     }
 
-
     private fun openRecipe(title: String, image: String, rating: Double, recipeId: String) {
         val bundle =
             bundleOf("title" to title, "image" to image, "rating" to rating, "recipeId" to recipeId)
@@ -214,4 +229,44 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
         openRecipe(recipes.title, recipes.image_url, recipes.social_rank, recipes.recipe_id)
     }
 
+
+    val customScrollListener = object : RecyclerView.OnScrollListener() {
+
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy)
+
+            val totalItemVisible = layoutManagerRecycler.childCount
+            val firstItemVisible = layoutManagerRecycler.findFirstCompletelyVisibleItemPosition()
+            val recyclerSize = adapterRecipeList.itemCount
+            val reachEndOfList = totalItemVisible + firstItemVisible >= recyclerSize
+            val moreResultLeftToFetch = resultsNumber >= QUERY_PAGE_SIZE
+
+            println("DEBUG, more result left to fetch = $moreResultLeftToFetch")
+
+            val shouldPaginate = !isLoading && reachEndOfList && moreResultLeftToFetch
+
+            if (shouldPaginate) {
+                println("DEBUG, shouldPaginate called!!")
+                val newPage = pageNumber+1
+                requestRecipeList(optionSelected, newPage)
+                println("DEBUG, shouldPaginate called, pageNumber requested = $newPage!!")
+            }
+
+        }
+
+        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+            super.onScrollStateChanged(recyclerView, newState)
+            if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
+                isScrolling = true
+            }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        println("DEBUG, list clear and image view GONE")
+        viewModel.recipeList = null
+        ivResultNotFound.visibility = View.GONE
+
+    }
 }
