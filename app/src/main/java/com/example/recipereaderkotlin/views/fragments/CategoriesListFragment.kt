@@ -2,6 +2,7 @@ package com.example.recipereaderkotlin.views.fragments
 
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.widget.SearchView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
@@ -29,6 +30,7 @@ class CategoriesListFragment : Fragment(R.layout.fragment_categories_list), Cate
         //nav component
         navController = Navigation.findNavController(view)
         initRecyclerView()
+        searchView()
     }
 
     /**
@@ -52,6 +54,25 @@ class CategoriesListFragment : Fragment(R.layout.fragment_categories_list), Cate
             adapter = adapterRecipes
             layoutManager = GridLayoutManager(activity, 2)
         }
+    }
+
+    private fun searchView(){
+
+        searchBar.setOnQueryTextListener(object: SearchView.OnQueryTextListener{
+
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                searchBar.clearFocus()
+                if (query!= null){
+                    openCategory(query.trim())
+                }
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return false
+            }
+        })
+
     }
 
     private fun openCategory(title : String){

@@ -40,7 +40,7 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
         //viewModel wired from activity
         viewModel = (activity as MainActivity).viewModel
         //by getting the category title here we can send the request to the server
-         incomingData()
+        incomingData()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -58,7 +58,7 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
     }
 
 
-    private fun incomingData(){
+    private fun incomingData() {
         incomingInfo = arguments?.getString("CategoryClicked")!!
         requestRecipeList(incomingInfo)
         println("Debugging, incomingInfo = $incomingInfo")
@@ -117,7 +117,7 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
     }
 
     private fun errorLoadingMessage(message: String) {
-        CoroutineScope(Main).launch {
+        MainScope().launch {
             hideProgressBar()
             btnRetryRecipeList.visibility = View.VISIBLE
             Snackbar.make(layout, message, Snackbar.LENGTH_LONG).show()
@@ -135,11 +135,14 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
             when (apiResponse) {
                 is Resource.Success -> {
                     if (apiResponse.data != null) {
-                        btnRetryRecipeList.visibility = View.INVISIBLE
-                        println("RecipeListFragment, response = successful with SIZE=${apiResponse.data.recipes.size}")
-                        showRecipeList(apiResponse.data.recipes)
-                    } else {
-                        println("RecipeListFragment, response = successful but null")
+                        if (apiResponse.data.recipes.size > 0) {
+                            btnRetryRecipeList.visibility = View.INVISIBLE
+                            println("RecipeListFragment, response = successful with SIZE=${apiResponse.data.recipes.size}")
+                            showRecipeList(apiResponse.data.recipes)
+                        } else {
+                            println("RecipeListFragment, response = NO RESULT FOUND :(")
+                            showImageNotFound()
+                        }
                     }
                 }
                 is Resource.Error -> {
@@ -156,7 +159,13 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
 
     }
 
-
+    private fun showImageNotFound() {
+        MainScope().launch {
+            delay(500L)
+            hideProgressBar()
+            ivResultNotFound.visibility = View.VISIBLE
+        }
+    }
 
     /**
      * here we feed the DiffUtil list in adapter
@@ -171,12 +180,10 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
     }
 
     private fun showProgressBar() {
-        println("RecipeListFragment, progressBar show")
         pbRecipeList.visibility = View.VISIBLE
     }
 
     private fun hideProgressBar() {
-        println("RecipeListFragment, progressBar hide")
         pbRecipeList.visibility = View.INVISIBLE
     }
 
@@ -184,8 +191,8 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
      * button retries connection to the server when there was no internet in previous request
      */
     private fun retryButton() {
-        btnRetryRecipeList.setOnClickListener{
-            btnRetryRecipeList.visibility= View.INVISIBLE
+        btnRetryRecipeList.setOnClickListener {
+            btnRetryRecipeList.visibility = View.INVISIBLE
             showProgressBar()
             incomingData()
             connectionToServer()
@@ -196,7 +203,10 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
     private fun openRecipe(title: String, image: String, rating: Double, recipeId: String) {
         val bundle =
             bundleOf("title" to title, "image" to image, "rating" to rating, "recipeId" to recipeId)
-        findNavController().navigate( R.id.action_recipeListFragment2_to_recipeDetailsFragment, bundle )
+        findNavController().navigate(
+            R.id.action_recipeListFragment2_to_recipeDetailsFragment,
+            bundle
+        )
     }
 
     override fun itemClick(position: Int) {
