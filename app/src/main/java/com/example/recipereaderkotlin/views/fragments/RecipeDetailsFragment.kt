@@ -31,6 +31,7 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
     private lateinit var author: String
     private lateinit var viewModel: RecipeViewModel
     private lateinit var layout: View
+    private lateinit var menuOption: Menu
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +58,7 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.toolbar_details, menu)
+        menuOption = menu
         super.onCreateOptionsMenu(menu, inflater)
     }
 
@@ -153,6 +155,7 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
                             println("debugging, value of i = $i")
                             setIngredientList(i)
                         }
+                        showIcon()
                         hideProgressBar()
                     }
                 }
@@ -177,6 +180,10 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
     private fun hideProgressBar() {
         println("RecipeListFragment, progressBar hide")
         pbRecipeDetails.visibility = View.INVISIBLE
+    }
+
+    private fun showIcon(){
+        menuOption.findItem(R.id.openArticle).setVisible(true)
     }
 
 
