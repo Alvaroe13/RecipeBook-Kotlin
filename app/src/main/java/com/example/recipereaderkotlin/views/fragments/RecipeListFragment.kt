@@ -45,17 +45,13 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
     lateinit var layoutManagerRecycler: LinearLayoutManager
 
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        //viewModel wired from activity
-        viewModel = (activity as MainActivity).viewModel
-        viewModel.recipeList = null
-        //by getting the category title here we can send the request to the server
-        incomingData()
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        //viewModel wired from activity
+        viewModel = (activity as MainActivity).viewModel
+        //by getting the category title here we can send the request to the server
+        incomingData()
 
         //without this we can't launch SnackBar when handling network time out
         layout = view

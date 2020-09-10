@@ -205,7 +205,10 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
         }
     }
 
-
+    override fun onPause() {
+        super.onPause()
+        viewModel.recipeDetail.postValue(null)
+    }
 }
 
 

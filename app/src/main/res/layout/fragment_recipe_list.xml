@@ -49,6 +49,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="visible"
+        android:indeterminateTint="@color/red"
         android:layout_gravity="bottom|center"
         android:padding="8dp"/>
 
