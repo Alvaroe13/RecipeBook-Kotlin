@@ -244,14 +244,15 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
 
     //-----------------------------Pagination Section ends here ---------------------------------//
 
-    private fun openRecipe(title: String, image: String, rating: Double, recipeId: String) {
-        val bundle = bundleOf("title" to title, "image" to image, "rating" to rating, "recipeId" to recipeId)
+    private fun openRecipe(title: String, image: String, rating: Double, recipeId: String, author: String) {
+        val bundle = bundleOf("title" to title, "image" to image,
+                                            "rating" to rating, "recipeId" to recipeId, "author" to author)
         findNavController().navigate( R.id.action_recipeListFragment2_to_recipeDetailsFragment, bundle)
     }
 
     override fun itemClick(position: Int) {
         val recipes = recipeList[position]
-        openRecipe(recipes.title, recipes.image_url, recipes.social_rank, recipes.recipe_id)
+        openRecipe(recipes.title, recipes.image_url, recipes.social_rank, recipes.recipe_id, recipes.publisher)
     }
 
     override fun onPause() {

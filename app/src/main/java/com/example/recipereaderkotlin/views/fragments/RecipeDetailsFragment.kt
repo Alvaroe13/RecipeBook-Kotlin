@@ -1,9 +1,14 @@
 package com.example.recipereaderkotlin.views.fragments
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
@@ -23,6 +28,7 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
     private lateinit var image: String
     private lateinit var recipeId: String
     private lateinit var rating: String
+    private lateinit var author: String
     private lateinit var viewModel: RecipeViewModel
     private lateinit var layout: View
 
@@ -33,15 +39,34 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         //viewModel wired from activity
         viewModel = (activity as MainActivity).viewModel
         //without this we can't launch SnackBar when handling network time out
         layout = view
+        setToolbar()
         getRecipeDetails()
         btnRetry()
 
     }
+
+    private fun setToolbar() {
+        setHasOptionsMenu(true)
+        (activity as AppCompatActivity).setSupportActionBar(tbRecipeDetails)
+        (activity as AppCompatActivity).supportActionBar?.setDisplayShowTitleEnabled(false)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.toolbar_details, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+            R.id.openArticle -> Toast.makeText(context, "Pressed" , Toast.LENGTH_SHORT).show()
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
 
     private fun incomingData() {
         if (arguments != null) {
@@ -49,6 +74,8 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
             image = arguments?.getString("image")!!
             rating = arguments?.getDouble("rating").toString()
             recipeId = arguments?.getString("recipeId")!!
+            author = arguments?.getString("author")!!
+
             println("RecipeListFragment, incomingData called!")
         }
     }
@@ -107,7 +134,7 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
             hideProgressBar()
             makeVisible()
             btnRetryRecipeDetails.visibility = View.VISIBLE
-            tvTitleRecipeDetails.text = message
+            tvAuthorRecipeDetails.text = message
         }
 
     }
@@ -118,7 +145,7 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
             when (response) {
                 is Resource.Success -> {
                     if (response.data != null) {
-                        setData(title, image, rating)
+                        setData(title, image, rating, author)
                         //erase ingredients from the view
                         llIngredients.removeAllViews()
                         //add ingredients to the view
@@ -174,10 +201,11 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
     /**
      * we set image, social rank and title with incoming data from RecipeListFragment
      */
-    private fun setData(title: String?, image: String?, rating: String?) {
+    private fun setData(title: String?, image: String?, rating: String?, author: String) {
         Glide.with(this).load(image).into(ivRecipeDetails)
-        tvTitleRecipeDetails.text = title
+        tvToolbarTitleDetails.text = title
         tvRatingRecipeDetails.text = rating
+        tvAuthorRecipeDetails.text = author
     }
 
     /**
@@ -185,7 +213,7 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
      */
     private fun makeVisible() {
         ivRecipeDetails.visibility = View.VISIBLE
-        tvTitleRecipeDetails.visibility = View.VISIBLE
+        tvAuthorRecipeDetails.visibility = View.VISIBLE
         tvRatingRecipeDetails.visibility = View.VISIBLE
         tvIngredientsDetails.visibility = View.VISIBLE
         llIngredients.visibility = View.VISIBLE
@@ -198,7 +226,7 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
         btnRetryRecipeDetails.setOnClickListener {
             btnRetryRecipeDetails.visibility = View.INVISIBLE
             ivRecipeDetails.visibility = View.INVISIBLE
-            tvTitleRecipeDetails.visibility = View.INVISIBLE
+            tvAuthorRecipeDetails.visibility = View.INVISIBLE
             showProgressBar()
             incomingData()
             getRecipeDetails()

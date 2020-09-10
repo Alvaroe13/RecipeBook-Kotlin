@@ -1,8 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:orientation="vertical">
+
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/tbRecipeDetails"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorPrimary"
+            app:menu="@menu/toolbar_details">
+
+            <TextView
+                android:id="@+id/tvToolbarTitleDetails"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="#FFFFFFFF"
+                android:textSize="18sp"/>
+
+
+        </androidx.appcompat.widget.Toolbar>
+
+    <androidx.core.widget.NestedScrollView
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".views.fragments.RecipeDetailsFragment">
@@ -25,7 +52,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/tvTitleRecipeDetails"
+            android:id="@+id/tvAuthorRecipeDetails"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
@@ -34,6 +61,7 @@
             android:maxLines="2"
             android:text="Title"
             android:textSize="20dp"
+            android:textStyle="italic"
             android:visibility="invisible"
             app:layout_constraintEnd_toStartOf="@+id/tvRatingRecipeDetails"
             app:layout_constraintStart_toStartOf="parent"
@@ -49,21 +77,20 @@
             android:textSize="15sp"
             android:textStyle="italic|bold"
             android:visibility="invisible"
-            app:layout_constraintEnd_toEndOf="@+id/tvTitleRecipeDetails"
+            app:layout_constraintEnd_toEndOf="@+id/tvAuthorRecipeDetails"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvTitleRecipeDetails" />
+            app:layout_constraintTop_toBottomOf="@+id/tvAuthorRecipeDetails" />
 
         <TextView
             android:id="@+id/tvRatingRecipeDetails"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
             android:layout_marginEnd="15dp"
             android:maxLength="2"
             android:textColor="@color/red"
             android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ivRecipeDetails" />
+            app:layout_constraintTop_toTopOf="@+id/tvAuthorRecipeDetails" />
 
 
         <LinearLayout
@@ -113,5 +140,8 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
+
 </androidx.core.widget.NestedScrollView>
 
+
+</LinearLayout>
