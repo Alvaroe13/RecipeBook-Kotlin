@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">recipeReaderKotlin</string>
+    <string name="app_name">måltid</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="pasta">pasta...</string>
 </resources>
