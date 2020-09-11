@@ -7,12 +7,14 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.example.recipereaderkotlin.R
+import com.example.recipereaderkotlin.models.RecipeDetails
 import com.example.recipereaderkotlin.utils.Constants.Companion.JOB_TIMEOUT
 import com.example.recipereaderkotlin.utils.Resource
 import com.example.recipereaderkotlin.viewModels.RecipeViewModel
@@ -29,6 +31,7 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
     private lateinit var recipeId: String
     private lateinit var rating: String
     private lateinit var author: String
+    private lateinit var url: String
     private lateinit var viewModel: RecipeViewModel
     private lateinit var layout: View
     private lateinit var menuOption: Menu
@@ -64,7 +67,7 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId){
-            R.id.openArticle -> Toast.makeText(context, "Pressed" , Toast.LENGTH_SHORT).show()
+            R.id.openArticle -> openArticle()
         }
         return super.onOptionsItemSelected(item)
     }
@@ -143,21 +146,9 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
 
     private fun subscribeObserver() {
         viewModel.recipeDetail.observe(viewLifecycleOwner, Observer { response ->
-            println("RecipeDetailsFragment, subscribeObserver, response = $response ")
             when (response) {
                 is Resource.Success -> {
-                    if (response.data != null) {
-                        setData(title, image, rating, author)
-                        //erase ingredients from the view
-                        llIngredients.removeAllViews()
-                        //add ingredients to the view
-                        for (i: String in response.data.recipe.recipeDetails) {
-                            println("debugging, value of i = $i")
-                            setIngredientList(i)
-                        }
-                        showIcon()
-                        hideProgressBar()
-                    }
+                    successfulResponse(response)
                 }
                 is Resource.Error -> {
                     hideProgressBar()
@@ -172,6 +163,24 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
         })
     }
 
+    private fun successfulResponse(response : Resource<RecipeDetails>) {
+        println("RecipeDetailsFragment, successfulResponse called")
+        if (response.data != null) {
+            val apiResponse = response.data.recipe
+            setData(title, image, rating, author)
+            //erase ingredients from the view
+            llIngredients.removeAllViews()
+            //add ingredients to the view
+            for (i: String in apiResponse.recipeDetails) {
+                println("debugging, value of i = $i")
+                setIngredientList(i)
+            }
+            showMenuIcon()
+            hideProgressBar()
+            url = apiResponse.source_url
+        }
+    }
+
     private fun showProgressBar() {
         println("RecipeListFragment, progressBar show")
         pbRecipeDetails.visibility = View.VISIBLE
@@ -182,8 +191,8 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
         pbRecipeDetails.visibility = View.INVISIBLE
     }
 
-    private fun showIcon(){
-        menuOption.findItem(R.id.openArticle).setVisible(true)
+    private fun showMenuIcon(){
+        menuOption.findItem(R.id.openArticle).isVisible = true
     }
 
 
@@ -226,9 +235,7 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
         llIngredients.visibility = View.VISIBLE
     }
 
-    /**
-     * button retries connection to the server when there was no internet in previous request
-     */
+    /**  button retries connection to the server when there was no internet in previous request  */
     private fun btnRetry() {
         btnRetryRecipeDetails.setOnClickListener {
             btnRetryRecipeDetails.visibility = View.INVISIBLE
@@ -238,6 +245,11 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
             incomingData()
             getRecipeDetails()
         }
+    }
+
+    private fun openArticle(){
+        val bundle = bundleOf( "url" to url)
+        findNavController().navigate( R.id.action_recipeDetailsFragment_to_recipeWebFragment, bundle)
     }
 
     override fun onPause() {

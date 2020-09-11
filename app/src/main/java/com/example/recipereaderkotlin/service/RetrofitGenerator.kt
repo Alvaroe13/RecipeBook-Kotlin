@@ -1,4 +1,4 @@
-package com.example.recipereaderkotlin.api
+package com.example.recipereaderkotlin.service
 
 import com.example.recipereaderkotlin.utils.Constants.Companion.BASE_URL
 import okhttp3.OkHttpClient

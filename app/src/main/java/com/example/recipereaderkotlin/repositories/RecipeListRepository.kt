@@ -1,6 +1,6 @@
 package com.example.recipereaderkotlin.repositories
 
-import com.example.recipereaderkotlin.api.RetrofitGenerator
+import com.example.recipereaderkotlin.service.RetrofitGenerator
 
 class RecipeListRepository {
 
