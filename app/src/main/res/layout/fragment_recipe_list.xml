@@ -48,7 +48,7 @@
         android:id="@+id/pbRecipeList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="visible"
+        android:visibility="invisible"
         android:indeterminateTint="@color/red"
         android:layout_gravity="bottom|center"
         android:padding="8dp"/>
