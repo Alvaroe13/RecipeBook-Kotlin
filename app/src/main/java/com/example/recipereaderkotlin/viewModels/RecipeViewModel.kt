@@ -1,18 +1,22 @@
 package com.example.recipereaderkotlin.viewModels
 
-import android.app.Application
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.ConnectivityManager.*
 import android.net.NetworkCapabilities.*
 import android.os.Build
+import android.util.Log
+import androidx.hilt.Assisted
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.recipereaderkotlin.models.RecipeDetails
 import com.example.recipereaderkotlin.models.RecipeResponse
 import com.example.recipereaderkotlin.repositories.RecipeListRepository
 import com.example.recipereaderkotlin.utils.Resource
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import java.io.IOException
@@ -20,11 +24,12 @@ import java.io.IOException
 /**
  * This viewModel will be shared with RecipeList and RecipeDetails fragments
  */
-class RecipeViewModel(
-    private val repository : RecipeListRepository,
-    private val application : Application
-)  : ViewModel() {
 
+class RecipeViewModel @ViewModelInject constructor(
+    private val repository: RecipeListRepository,
+    @ApplicationContext private val application: Context,
+    @Assisted private val savedStateHandle: SavedStateHandle //hilt stuff
+) : ViewModel() {
 
     val recipeListResponse: MutableLiveData<Resource<RecipeResponse>> = MutableLiveData()
     val recipeDetail : MutableLiveData<Resource<RecipeDetails>> = MutableLiveData()

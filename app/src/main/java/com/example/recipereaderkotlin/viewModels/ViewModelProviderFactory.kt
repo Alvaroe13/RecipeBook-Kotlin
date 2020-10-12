@@ -8,12 +8,15 @@ import com.example.recipereaderkotlin.repositories.RecipeListRepository
 /**
  * without this class we can't pass the repository class as param in the viewModel
  */
-class ViewModelProviderFactory(  private val repository: RecipeListRepository, private val application: Application): ViewModelProvider.Factory {
+class ViewModelProviderFactory(  private val repository: RecipeListRepository, private val application: Application) {
+   // : ViewModelProvider.Factory
 
 
+/*
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         return RecipeViewModel( repository, application) as T
     }
+*/
 
 
 

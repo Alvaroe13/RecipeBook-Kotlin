@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
@@ -18,12 +19,13 @@ import com.example.recipereaderkotlin.models.RecipeDetails
 import com.example.recipereaderkotlin.utils.Constants.Companion.JOB_TIMEOUT
 import com.example.recipereaderkotlin.utils.Resource
 import com.example.recipereaderkotlin.viewModels.RecipeViewModel
-import com.example.recipereaderkotlin.views.MainActivity
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_recipe_details.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 
+@AndroidEntryPoint
 class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
 
     private lateinit var title: String
@@ -32,7 +34,7 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
     private lateinit var rating: String
     private lateinit var author: String
     private lateinit var url: String
-    private lateinit var viewModel: RecipeViewModel
+    private val viewModel: RecipeViewModel by viewModels()
     private lateinit var layout: View
     private lateinit var menuOption: Menu
 
@@ -43,14 +45,11 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //viewModel wired from activity
-        viewModel = (activity as MainActivity).viewModel
         //without this we can't launch SnackBar when handling network time out
         layout = view
         setToolbar()
         getRecipeDetails()
         btnRetry()
-
     }
 
     private fun setToolbar() {

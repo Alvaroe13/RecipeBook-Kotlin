@@ -5,7 +5,9 @@ import android.view.View
 import android.widget.AbsListView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
@@ -19,20 +21,20 @@ import com.example.recipereaderkotlin.utils.Constants.Companion.PAGE_NUMBER
 import com.example.recipereaderkotlin.utils.Constants.Companion.QUERY_PAGE_SIZE
 import com.example.recipereaderkotlin.utils.Resource
 import com.example.recipereaderkotlin.viewModels.RecipeViewModel
-import com.example.recipereaderkotlin.views.MainActivity
 import com.example.recipereaderkotlin.views.adapters.RecipeListAdapter
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_recipe_list.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 
-
+@AndroidEntryPoint
 class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAdapter.ClickHandler {
 
     private lateinit var optionSelected: String
     private lateinit var adapterRecipeList: RecipeListAdapter
-    private lateinit var viewModel: RecipeViewModel
+    private val viewModel: RecipeViewModel by viewModels()
     private lateinit var layout: View
     private lateinit var navController: NavController
     private var recipeList = listOf<Recipe>()
@@ -48,11 +50,8 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //viewModel wired from activity
-        viewModel = (activity as MainActivity).viewModel
         //by getting the category title here we can send the request to the server
         incomingData()
-
         //without this we can't launch SnackBar when handling network time out
         layout = view
         tvToolbarTitle.text = optionSelected
@@ -87,7 +86,8 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
 
     private fun connectionToServer() {
 
-        CoroutineScope(IO).launch {
+
+        lifecycleScope.launch(IO) {
 
             val hasInternet = viewModel.checkInternetConnection()
 
@@ -99,7 +99,6 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
                 delay(JOB_TIMEOUT)
                 errorLoadingMessage("No internet connection")
             }
-
         }
 
     }

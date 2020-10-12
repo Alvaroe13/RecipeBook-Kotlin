@@ -1,8 +1,9 @@
 package com.example.recipereaderkotlin.repositories
 
 import com.example.recipereaderkotlin.service.RetrofitGenerator
+import javax.inject.Inject
 
-class RecipeListRepository {
+class RecipeListRepository @Inject constructor() {
 
     //this one retrieves the list of recipes
     suspend fun fetchRecipeList(optionSelected: String, pageNumber: Int)  =
@@ -10,6 +11,5 @@ class RecipeListRepository {
 
     suspend fun getRecipeDetails(recipeId : String) =
         RetrofitGenerator.apiConnection.getRecipeDetails(recipeId)
-
 
 }
