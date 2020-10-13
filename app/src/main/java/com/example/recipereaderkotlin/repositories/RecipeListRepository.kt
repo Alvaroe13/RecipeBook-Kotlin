@@ -1,15 +1,15 @@
 package com.example.recipereaderkotlin.repositories
 
-import com.example.recipereaderkotlin.service.RetrofitGenerator
+import com.example.recipereaderkotlin.service.Api
 import javax.inject.Inject
 
-class RecipeListRepository @Inject constructor() {
+class RecipeListRepository @Inject constructor(
+    private val connectionApi : Api
+) {
 
-    //this one retrieves the list of recipes
     suspend fun fetchRecipeList(optionSelected: String, pageNumber: Int)  =
-        RetrofitGenerator.apiConnection.getRecipeList(optionSelected, pageNumber.toString())
+                           connectionApi.getRecipeList(optionSelected, pageNumber)
 
     suspend fun getRecipeDetails(recipeId : String) =
-        RetrofitGenerator.apiConnection.getRecipeDetails(recipeId)
-
+                  connectionApi.getRecipeDetails(recipeId)
 }

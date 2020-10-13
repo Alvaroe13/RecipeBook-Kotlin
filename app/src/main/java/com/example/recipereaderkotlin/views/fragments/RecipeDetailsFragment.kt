@@ -16,7 +16,7 @@ import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.example.recipereaderkotlin.R
 import com.example.recipereaderkotlin.models.RecipeDetails
-import com.example.recipereaderkotlin.utils.Constants.Companion.JOB_TIMEOUT
+import com.example.recipereaderkotlin.utils.Constants.JOB_TIMEOUT
 import com.example.recipereaderkotlin.utils.Resource
 import com.example.recipereaderkotlin.viewModels.RecipeViewModel
 import dagger.hilt.android.AndroidEntryPoint

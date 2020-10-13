@@ -11,7 +11,7 @@ interface Api {
     @GET("api/search")  //fetch list of all recipes from server
     suspend fun getRecipeList(
         @Query("q") recipeType : String,
-        @Query("page") pageNumber : String) : Response<RecipeResponse>
+        @Query("page") pageNumber : Int) : Response<RecipeResponse>
 
     @GET("api/get") //fetch recipes details from server
     suspend fun getRecipeDetails(

@@ -16,9 +16,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.recipereaderkotlin.R
 import com.example.recipereaderkotlin.models.Recipe
 import com.example.recipereaderkotlin.models.RecipeResponse
-import com.example.recipereaderkotlin.utils.Constants.Companion.JOB_TIMEOUT
-import com.example.recipereaderkotlin.utils.Constants.Companion.PAGE_NUMBER
-import com.example.recipereaderkotlin.utils.Constants.Companion.QUERY_PAGE_SIZE
+import com.example.recipereaderkotlin.utils.Constants.JOB_TIMEOUT
+import com.example.recipereaderkotlin.utils.Constants.PAGE_NUMBER
+import com.example.recipereaderkotlin.utils.Constants.QUERY_PAGE_SIZE
 import com.example.recipereaderkotlin.utils.Resource
 import com.example.recipereaderkotlin.viewModels.RecipeViewModel
 import com.example.recipereaderkotlin.views.adapters.RecipeListAdapter
