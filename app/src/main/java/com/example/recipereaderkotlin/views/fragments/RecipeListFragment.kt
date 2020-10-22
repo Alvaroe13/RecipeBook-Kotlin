@@ -5,7 +5,7 @@ import android.view.View
 import android.widget.AbsListView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
@@ -34,11 +34,11 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
 
     private lateinit var optionSelected: String
     private lateinit var adapterRecipeList: RecipeListAdapter
-    private val viewModel: RecipeViewModel by viewModels()
+    private val viewModel: RecipeViewModel by activityViewModels()
     private lateinit var layout: View
     private lateinit var navController: NavController
     private var recipeList = listOf<Recipe>()
-
+    private lateinit var optionPressed: String
     //pagination
     private var pageNumber = PAGE_NUMBER
     private var isLoading = false
@@ -49,30 +49,16 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        //by getting the category title here we can send the request to the server
-        incomingData()
         //without this we can't launch SnackBar when handling network time out
         layout = view
-        tvToolbarTitle.text = optionSelected
+        //by getting the category title here we can send the request to the server
+        getCategorySelected()
         navController = Navigation.findNavController(view)
         initRecycler()
-        connectionToServer()
         retryButton()
+        secureRecipeRetrieval()
     }
 
-
-    private fun incomingData() {
-        optionSelected = arguments?.getString("CategoryClicked")!!
-        println("RecipeListFragment, incomingInfo = $optionSelected")
-    }
-
-    /**  this one makes the request to the api */
-    private fun requestRecipeList(title: String, pageNumber: Int) {
-        isLoading = true
-        viewModel.getRecipeList(title, pageNumber)
-        println("RecipeListFragment, retrieveRecipeList called with $title")
-    }
 
     private fun initRecycler() {
         adapterRecipeList = RecipeListAdapter(this)
@@ -84,37 +70,63 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
         }
     }
 
-    private fun connectionToServer() {
+    /** button retries connection to the server when there was no internet in previous request*/
+    private fun retryButton() {
+        btnRetryRecipeList.setOnClickListener {
 
+            lifecycleScope.launch(IO) {
+                val hasInternet = viewModel.checkInternetConnection()
 
-        lifecycleScope.launch(IO) {
-
-            val hasInternet = viewModel.checkInternetConnection()
-
-            if (hasInternet) {
-                requestRecipeList(optionSelected, pageNumber)
-                secureRecipeRetrieval()
-            } else {
-                //use job timeout to make user experience better before showing error message in snackBar
-                delay(JOB_TIMEOUT)
-                errorLoadingMessage("No internet connection")
+                if (hasInternet) {
+                    btnRetryRecipeList.visibility = View.INVISIBLE
+                    showProgressBar()
+                    // incomingData()
+                    connectionToServer(optionPressed)
+                } else {
+                    //use job timeout to make user experience better before showing error message in snackBar
+                    delay(JOB_TIMEOUT)
+                    errorLoadingMessage("No internet connection")
+                }
             }
         }
+    }
 
+    private fun getCategorySelected() {
+        println("RecipeListFragment, getCategorySelected, called")
+        viewModel.getTitle().observe(viewLifecycleOwner, Observer {
+            println("RecipeListFragment, getCategorySelected, incoming result = $it")
+            optionPressed = it
+            tvToolbarTitle.text = it
+            connectionToServer(it)
+        })
+    }
+
+    private fun connectionToServer(option: String?) {
+        println("connectionToServer, called!")
+        requestRecipeList(option, pageNumber)
+    }
+
+
+    /**  this one makes the request to the api */
+    private fun requestRecipeList(title: String?, pageNumber: Int) {
+        isLoading = true
+        viewModel.getRecipeList(title, pageNumber)
+        println("RecipeListFragment, retrieveRecipeList called with $title")
     }
 
     /** this one handles network timeout, it will only get triggered if network request takes longer than 3 secs */
-    private suspend fun secureRecipeRetrieval() {
-
-        val job = withTimeoutOrNull(JOB_TIMEOUT) {
-            withContext(Main) {
-                println("RecipeListFragment, withContext called")
-                subscribeObserver()
+    private fun secureRecipeRetrieval() {
+        lifecycleScope.launch(IO) {
+            val job = withTimeoutOrNull(JOB_TIMEOUT) {
+                withContext(Main) {
+                    println("RecipeListFragment, withContext called")
+                    subscribeObserver()
+                }
             }
-        }
-        if (job == null) {
-            withContext(Main) {
-                errorLoadingMessage("Something went wrong, try again")
+            if (job == null) {
+                withContext(Main) {
+                    errorLoadingMessage("Something went wrong, try again")
+                }
             }
         }
     }
@@ -200,15 +212,6 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
         pbRecipeList.visibility = View.INVISIBLE
     }
 
-    /** button retries connection to the server when there was no internet in previous request*/
-    private fun retryButton() {
-        btnRetryRecipeList.setOnClickListener {
-            btnRetryRecipeList.visibility = View.INVISIBLE
-            showProgressBar()
-            incomingData()
-            connectionToServer()
-        }
-    }
 
     //-------------------------------Pagination Section-------------------------------------------//
 
@@ -233,6 +236,7 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
             }
 
         }
+
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
             if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
@@ -243,15 +247,32 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list), RecipeListAd
 
     //-----------------------------Pagination Section ends here ---------------------------------//
 
-    private fun openRecipe(title: String, image: String, rating: Double, recipeId: String, author: String) {
-        val bundle = bundleOf("title" to title, "image" to image,
-                                            "rating" to rating, "recipeId" to recipeId, "author" to author)
-        findNavController().navigate( R.id.action_recipeListFragment2_to_recipeDetailsFragment, bundle)
+    private fun openRecipe(
+        title: String,
+        image: String,
+        rating: Double,
+        recipeId: String,
+        author: String
+    ) {
+        val bundle = bundleOf(
+            "title" to title, "image" to image,
+            "rating" to rating, "recipeId" to recipeId, "author" to author
+        )
+        findNavController().navigate(
+            R.id.action_recipeListFragment2_to_recipeDetailsFragment,
+            bundle
+        )
     }
 
     override fun itemClick(position: Int) {
         val recipes = recipeList[position]
-        openRecipe(recipes.title, recipes.image_url, recipes.social_rank, recipes.recipe_id, recipes.publisher)
+        openRecipe(
+            recipes.title,
+            recipes.image_url,
+            recipes.social_rank,
+            recipes.recipe_id,
+            recipes.publisher
+        )
     }
 
     override fun onPause() {

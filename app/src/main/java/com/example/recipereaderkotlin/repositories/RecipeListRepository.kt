@@ -7,7 +7,7 @@ class RecipeListRepository @Inject constructor(
     private val connectionApi : Api
 ) {
 
-    suspend fun fetchRecipeList(optionSelected: String, pageNumber: Int)  =
+    suspend fun fetchRecipeList(optionSelected: String?, pageNumber: Int)  =
                            connectionApi.getRecipeList(optionSelected, pageNumber)
 
     suspend fun getRecipeDetails(recipeId : String) =

@@ -3,14 +3,15 @@ package com.example.recipereaderkotlin.views.fragments
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.widget.SearchView
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.recipereaderkotlin.R
 import com.example.recipereaderkotlin.models.RecipeCategories
+import com.example.recipereaderkotlin.viewModels.RecipeViewModel
 import com.example.recipereaderkotlin.views.adapters.CategoriesListAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_categories_list.*
@@ -20,6 +21,7 @@ class CategoriesListFragment : Fragment(R.layout.fragment_categories_list), Cate
 
     private lateinit var navController : NavController
     private lateinit var adapterRecipes : CategoriesListAdapter
+    private val viewModel : RecipeViewModel by activityViewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -73,8 +75,10 @@ class CategoriesListFragment : Fragment(R.layout.fragment_categories_list), Cate
     }
 
     private fun openCategory(title : String){
-        val bundle = bundleOf("CategoryClicked" to title )
-        findNavController().navigate(R.id.action_recipeListFragment_to_recipeListFragment2, bundle)
+       // val bundle = bundleOf("CategoryClicked" to title )
+        println("CategoriesListFragment, openCategory = $title")
+        viewModel.passCategorySelected(title)
+        findNavController().navigate(R.id.action_recipeListFragment_to_recipeListFragment2)
     }
 
 
