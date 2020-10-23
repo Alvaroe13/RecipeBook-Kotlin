@@ -1,17 +1,23 @@
 package com.example.recipereaderkotlin.models
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import com.example.recipereaderkotlin.utils.Constants.DATABASE_NAME_RECIPE_LIST
 import com.google.gson.annotations.SerializedName
 
+@Entity( tableName = DATABASE_NAME_RECIPE_LIST)
 data class Recipe(
+    @PrimaryKey(autoGenerate = false)
     @SerializedName("_id")
-    val id: String,
-    val image_url: String  ,
-    val publisher: String,
-    val publisher_url: String   ,
-    val recipe_id: String  ,
-    val social_rank: Double ,
-    val source_url: String ,
-    val title: String ,
+    var id: String,
+
+    var image_url: String,
+    var publisher: String,
+    var publisher_url: String,
+    var recipe_id: String,
+    var social_rank: Double,
+    var source_url: String,
+    var title: String,
     @SerializedName("ingredients")
-    val recipeDetails : Array<String>
+    var recipeDetails : MutableList<String>
 )

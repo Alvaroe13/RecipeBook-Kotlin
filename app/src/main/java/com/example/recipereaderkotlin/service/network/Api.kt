@@ -1,4 +1,4 @@
-package com.example.recipereaderkotlin.service
+package com.example.recipereaderkotlin.service.network
 
 import com.example.recipereaderkotlin.models.RecipeDetails
 import com.example.recipereaderkotlin.models.RecipeResponse

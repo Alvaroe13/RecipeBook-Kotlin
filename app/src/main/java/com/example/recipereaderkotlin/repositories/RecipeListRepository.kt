@@ -1,6 +1,6 @@
 package com.example.recipereaderkotlin.repositories
 
-import com.example.recipereaderkotlin.service.Api
+import com.example.recipereaderkotlin.service.network.Api
 import javax.inject.Inject
 
 class RecipeListRepository @Inject constructor(
